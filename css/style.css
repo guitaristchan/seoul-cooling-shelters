@@ -1,0 +1,437 @@
+/* ============================================================
+   도시의 그늘 — 스크롤리텔링 스타일
+   레퍼런스 무드: 어두운 배경, 풀스크린 그래픽, 반투명 sticky 텍스트
+   ============================================================ */
+
+:root {
+  --bg: #0e1116;
+  --bg-soft: #161b22;
+  --fg: #e8edf2;
+  --muted: #9aa4af;
+  --accent-temp: #ff6b4a; /* 기온 */
+  --accent-pat: #4aa8ff; /* 온열질환 */
+  --accent-heat: #ff3b2f; /* 폭염 밴드 */
+
+  /* 레퍼런스 '팝' 팔레트 (아이소메트릭 무드) */
+  --pop-pink: #e94fd0;
+  --pop-pink-deep: #a12bb0;
+  --pop-cyan: #19d3e6;
+  --pop-lime: #39e67a;
+  --pop-yellow: #ffd23f;
+  --pop-orange: #ff7a2f;
+  --pop-green-train: #2ecf7a;
+  --ink: #141018;
+  --box-bg: rgba(14, 17, 22, 0.72);
+  --box-border: rgba(255, 255, 255, 0.08);
+  --font: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Malgun Gothic", "맑은 고딕", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
+}
+
+/* ---- 로더 ---- */
+#loader {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 1rem;
+  z-index: 100;
+  text-align: center;
+  transition: opacity 0.6s ease;
+}
+#loader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+#loader code {
+  background: var(--bg-soft);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent-pat);
+}
+
+/* ============================================================
+   고정 그래픽 레이어 (화면 전체 캔버스)
+   ============================================================ */
+.graphic {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+.graphic-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.graphic-layer.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ---- Intro SVG ---- */
+.intro-svg {
+  width: 100%;
+  height: 100%;
+}
+.axis path,
+.axis line {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+.axis text {
+  fill: var(--muted);
+  font-size: 12px;
+}
+.line {
+  stroke-width: 2.5;
+}
+.line-temp {
+  stroke: var(--accent-temp);
+  filter: drop-shadow(0 0 6px rgba(255, 107, 74, 0.35));
+}
+.line-pat {
+  stroke: var(--accent-pat);
+  filter: drop-shadow(0 0 6px rgba(74, 168, 255, 0.35));
+}
+.heat-band {
+  fill: var(--accent-heat);
+}
+
+/* ============================================================
+   SECTION 1 — 고정 지도 + 쉼터 점 (scrollama 스텝)
+   ============================================================ */
+.s1-mapwrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.s1-svg {
+  display: block;
+}
+.s1-gu {
+  fill: rgba(74, 168, 255, 0.05);
+  stroke: rgba(74, 168, 255, 0.35);
+  stroke-width: 1;
+}
+/* 실질(개방형) 쉼터 — 시안, 끝까지 남음 */
+.s1-dot-open {
+  fill: var(--pop-cyan, #19d3e6);
+  stroke: #fff;
+  stroke-width: 0.4;
+  opacity: 0.9;
+}
+/* 회원 전용 — 오렌지, s1-2 에서 사라짐 */
+.s1-dot-member {
+  fill: var(--accent-temp);
+  opacity: 0.6;
+}
+
+/* 남은 쉼터 배지 */
+.s1-badge {
+  position: absolute;
+  top: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  background: var(--box-bg);
+  border: 1px solid var(--box-border);
+  border-radius: 12px;
+  padding: 0.7rem 1.6rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.s1-badge-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.s1-badge-count {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--pop-cyan, #19d3e6);
+}
+
+/* ============================================================
+   SECTION 2 — 자치구 Choropleth (기초수급 독거노인)
+   ============================================================ */
+.s2-mapwrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.s2-svg {
+  display: block;
+}
+.s2-gu {
+  stroke: rgba(14, 17, 22, 0.6);
+  stroke-width: 0.8;
+  transition: opacity 0.6s ease, stroke 0.4s ease, stroke-width 0.4s ease;
+}
+.s2-gu.is-dim {
+  opacity: 0.25;
+}
+.s2-gu.is-slum {
+  stroke: #fff;
+  stroke-width: 2.2;
+}
+/* 핀 */
+.s2-pin {
+  opacity: 0;
+  pointer-events: none;
+}
+.s2-pin-dot {
+  fill: var(--accent-heat);
+  stroke: #fff;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 8px rgba(255, 59, 47, 0.6));
+}
+.s2-pin-label {
+  fill: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: rgba(14, 17, 22, 0.85);
+  stroke-width: 3px;
+}
+/* 범례 */
+.s2-legend {
+  position: absolute;
+  bottom: 5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(340px, 70vw);
+  background: var(--box-bg);
+  border: 1px solid var(--box-border);
+  border-radius: 12px;
+  padding: 0.7rem 1rem 0.8rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.s2-legend-title {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+  text-align: center;
+}
+.s2-legend-bar {
+  height: 10px;
+  border-radius: 5px;
+}
+.s2-legend-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+
+/* ---- placeholder (아직 미구현 씬) ---- */
+.placeholder {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem;
+}
+.placeholder-tag {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-pat);
+  margin-bottom: 1rem;
+}
+.placeholder-stat {
+  font-size: 1.6rem;
+  line-height: 1.6;
+  color: var(--fg);
+}
+.placeholder-stat b {
+  color: var(--accent-temp);
+  font-size: 2.2rem;
+}
+
+/* ============================================================
+   스크롤 내러티브
+   ============================================================ */
+#scrolly {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---- 커버 ---- */
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+.cover h1 {
+  font-size: clamp(2.8rem, 8vw, 6rem);
+  margin: 0 0 1rem;
+  letter-spacing: 0.05em;
+  background: linear-gradient(120deg, var(--accent-temp), var(--accent-pat));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.cover .subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  color: var(--muted);
+  margin: 0 0 4rem;
+}
+.cover .scroll-hint {
+  font-size: 0.9rem;
+  color: var(--muted);
+  animation: bob 1.8s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+/* ---- 스텝 ---- */
+.scene-steps {
+  position: relative;
+}
+.step {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  /* 기본: 좌측 정렬 */
+  justify-content: flex-start;
+  padding: 0 6vw;
+}
+/* 섹션별로 좌/우 번갈아 배치 */
+.scene-steps[data-section="section1"] .step,
+.scene-steps[data-section="outro"] .step {
+  justify-content: flex-end;
+}
+
+.text-box {
+  max-width: 420px;
+  background: var(--box-bg);
+  border: 1px solid var(--box-border);
+  border-radius: 14px;
+  padding: 1.6rem 1.8rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  opacity: 0.35;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.step.is-active .text-box {
+  opacity: 1;
+  transform: translateY(0);
+}
+.text-box h2 {
+  margin: 0 0 0.8rem;
+  font-size: 1.5rem;
+  color: var(--fg);
+}
+.text-box p {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #d4dbe2;
+}
+.text-box strong {
+  color: var(--accent-temp);
+  font-weight: 700;
+}
+
+/* ---- 엔딩 ---- */
+.end {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem;
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(to bottom, transparent, var(--bg) 35%);
+}
+.end-title {
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  margin: 0 0 1.2rem;
+  background: linear-gradient(120deg, var(--accent-temp), var(--accent-pat));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.end-sub {
+  max-width: 540px;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #d4dbe2;
+  margin: 0 0 3rem;
+}
+.end-src {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ---- 모바일 ---- */
+@media (max-width: 640px) {
+  .step {
+    justify-content: center !important;
+    padding: 0 5vw;
+  }
+  .text-box {
+    max-width: 100%;
+  }
+}
+
+/* ============================================================
+   OUTRO — 재정자립도 × 실질쉼터 산점도
+   ============================================================ */
+.o-wrap { position: absolute; inset: 0; }
+.o-svg { display: block; }
+.o-axis path, .o-axis line { stroke: rgba(255, 255, 255, 0.2); }
+.o-axis text { fill: var(--muted); font-size: 12px; }
+.o-axis-label { fill: var(--fg); font-size: 13px; }
+.o-dot {
+  fill: var(--accent-pat);
+  stroke: #fff; stroke-width: 1;
+  opacity: 0.9;
+}
+.o-label {
+  fill: #d4dbe2; font-size: 11px;
+  paint-order: stroke; stroke: rgba(14, 17, 22, 0.85); stroke-width: 3px;
+}
+.o-trend {
+  stroke: var(--accent-temp); stroke-width: 2.5; stroke-dasharray: 6 5;
+}

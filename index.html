@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>도시의 그늘 — 무더위 쉼터와 기후취약계층의 불일치</title>
+
+    <!-- 라이브러리 (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/scrollama@3.2.0/build/scrollama.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <!-- 로딩 -->
+    <div id="loader">데이터를 불러오는 중…</div>
+
+    <!-- 고정 배경 그래픽 레이어 (화면 전체 캔버스) -->
+    <div id="graphic" class="graphic">
+      <div id="layer-intro" class="graphic-layer"></div>
+      <div id="layer-section1" class="graphic-layer"></div>
+      <div id="layer-section2" class="graphic-layer"></div>
+      <div id="layer-outro" class="graphic-layer"></div>
+    </div>
+
+    <!-- 스크롤 내러티브 -->
+    <main id="scrolly">
+      <!-- ============ 타이틀 ============ -->
+      <section class="cover">
+        <h1>도시의 그늘</h1>
+        <p class="subtitle">무더위 쉼터는 정말 필요한 곳에 있을까</p>
+        <p class="scroll-hint">스크롤하여 이야기를 따라가 보세요 ↓</p>
+      </section>
+
+      <!-- ============ INTRO: 라인차트 ============ -->
+      <section class="scene-steps" data-section="intro">
+        <div class="step" data-scene="intro" data-step="intro-1">
+          <div class="text-box">
+            <h2>왜 쉼터가 필요할까</h2>
+            <p>
+              2025년 여름, 서울의 한낮 최고기온은 꾸준히 오르며
+              <strong>폭염일수 28일</strong>을 기록했습니다.
+            </p>
+          </div>
+        </div>
+
+        <div class="step" data-scene="intro" data-step="intro-2">
+          <div class="text-box">
+            <p>
+              기온이 치솟을 때마다 <strong>온열질환자</strong>도 함께 늘었습니다.
+              2025년 전국 신고 환자는 <strong>4,460명</strong>에 달했죠.
+            </p>
+          </div>
+        </div>
+
+        <div class="step" data-scene="intro" data-step="intro-3">
+          <div class="text-box">
+            <p>
+              색으로 칠해진 구간이 바로 <strong>폭염일</strong>입니다. 더위가
+              집중되는 이 시기, 갈 곳 없는 사람들에게 쉼터는 생명선이 됩니다.
+            </p>
+          </div>
+        </div>
+
+        <div class="step" data-scene="intro" data-step="intro-4">
+          <div class="text-box">
+            <p>
+              특히 피해는 고르게 퍼지지 않습니다. 서울 도심의
+              <strong>고령층</strong>에게 더위는 훨씬 더 위험합니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SECTION 1: 지도 (고정 지도 + scrollama 스텝) ============ -->
+      <section class="scene-steps" data-section="section1">
+        <div class="step" data-scene="section1" data-step="s1-1">
+          <div class="text-box">
+            <h2>쉼터는 어디에 있나</h2>
+            <p>
+              서울 곳곳에 무더위 쉼터가 흩어져 있습니다.
+              <strong>전체 4,092곳</strong>, 숫자만 보면 넉넉해 보입니다.
+            </p>
+          </div>
+        </div>
+        <div class="step" data-scene="section1" data-step="s1-2">
+          <div class="text-box">
+            <p>
+              하지만 상당수는 경로당 등 <strong>회원 전용 시설</strong>입니다.
+              이들을 걷어내면, 누구나 쓸 수 있는 실질 쉼터는
+              <strong>1,254곳</strong>으로 줄어듭니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SECTION 2: 취약계층 Choropleth ============ -->
+      <section class="scene-steps" data-section="section2">
+        <div class="step" data-scene="section2" data-step="s2-1">
+          <div class="text-box">
+            <h2>필요한 사람은 어디에 사나</h2>
+            <p>
+              이번엔 <strong>저소득 독거노인</strong>이 어디에 많은지 살펴봅니다.
+              색이 짙을수록 기초수급 독거노인이 밀집한 자치구입니다.
+            </p>
+          </div>
+        </div>
+        <div class="step" data-scene="section2" data-step="s2-2">
+          <div class="text-box">
+            <p>
+              종로·중구·영등포의 <strong>쪽방촌</strong> 일대는 대표적인 주거
+              취약 지역입니다. 더위에 가장 약한 사람들이 모여 사는 곳이죠.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ OUTRO: 산점도 ============ -->
+      <section class="scene-steps" data-section="outro">
+        <div class="step" data-scene="outro" data-step="o-1">
+          <div class="text-box">
+            <h2>위치의 불일치</h2>
+            <p>
+              가로축은 자치구 <strong>재정자립도</strong>, 세로축은 저소득 독거노인
+              <strong>1천 명당 실질 쉼터 수</strong>입니다.
+            </p>
+          </div>
+        </div>
+        <div class="step" data-scene="outro" data-step="o-2">
+          <div class="text-box">
+            <p>
+              추세선은 오른쪽 위로 향합니다. 재정이 넉넉한 자치구일수록 쉼터가
+              많고, <strong>정작 취약한 지역은 뒤로 밀려</strong> 있습니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="end">
+        <h2 class="end-title">쉼터는, 가장 필요한 곳에 있어야 합니다.</h2>
+        <p class="end-sub">
+          더위는 모두에게 공평하지 않습니다. 위치의 불일치를 좁히는 일이,
+          누군가에게는 생명을 지키는 일이 됩니다.
+        </p>
+        <p class="end-src">
+          데이터 출처: 질병관리청 온열질환 감시체계, 서울시 무더위쉼터, 통계청
+        </p>
+      </footer>
+    </main>
+
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>
